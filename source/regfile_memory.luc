@@ -1,0 +1,25 @@
+module regfile_memory (
+    input clk,  // clock
+    input rst, // reset
+    input read_address_1[5],
+    input read_address_2[5],
+    output reg_data_1[32],
+    output reg_data_2[32],
+    input write_address[5],
+    input write_data[32],
+    input write_enable
+  ) {
+  
+  dff registers[32][32](#INIT(32x{{32h0}}), .clk(clk), .rst(rst));
+  
+  always {
+  
+    // initial setups to silence output compilation errors
+    reg_data_1 = 0;
+    reg_data_2 = 0;
+
+    // TASK 7 
+
+    
+  }
+}

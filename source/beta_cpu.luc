@@ -1,0 +1,99 @@
+module beta_cpu (
+    input clk,  // clock
+    input slowclk,
+    input rst,
+    input irq,
+    input instruction[32],
+    input mem_data_input[32],
+    output ia[32],
+    output mem_data_address[32],
+    output mem_data_output[32],
+    output wr,
+    output debug[4][16]
+
+  ) {
+  
+  control_unit control_system(.clk(clk), .rst(rst));
+  alu alu_system;
+  regfile_unit regfile_system(.clk(clk), .rst(rst));
+  pc_unit pc_system(.clk(clk), .rst(rst));
+
+  sig asel_out[32];
+  sig bsel_out[32];
+  sig wdsel_out[32];
+
+  always {
+    // initial setups to silence output compilation errors
+    ia = 0;
+    mem_data_address = 0;
+    mem_data_output = 0;
+    wr = 0;
+    debug = 4x{{16h0}};
+    control_system.irq = 0;
+    control_system.slowclk = 0;
+    control_system.ia31 = 0;
+    control_system.opcode = 0;
+    control_system.z = 0;
+    regfile_system.ra2sel = 0;
+    regfile_system.wasel = 0;
+    regfile_system.ra = 0;
+    regfile_system.rb = 0;
+    regfile_system.rc = 0;
+    regfile_system.werf = 0;
+    regfile_system.slowclk = 0;
+    pc_system.slowclk = 0;
+    pc_system.id = 0;
+    pc_system.reg_data_1 = 0;
+    pc_system.pcsel = 0;
+    
+    // Task 12
+ 
+    //****** ALU + WDSEL unit *******//
+    // ASEL mux
+    alu_system.alufn_signal = control_system.alufn;
+    case(control_system.asel){
+      b0:
+        asel_out = regfile_system.reg_data_1;
+      b1:
+        asel_out = c{0, pc_system.pc_4_sxtc[30:0]}; // supervisor bit is ignored in LDR
+      default:
+        asel_out = regfile_system.reg_data_1;
+    }
+
+    // BSEL mux
+    case(control_system.bsel){
+      b0:
+        bsel_out = regfile_system.reg_data_2;
+      b1:
+        bsel_out = c{instruction[15], instruction[15:0]};
+        
+      default:
+        bsel_out = regfile_system.reg_data_2;
+    }
+
+    // WDSEL mux
+    case(control_system.wdsel){
+      b00:
+        wdsel_out = pc_system.pc_4; // Supervisor bit is already protected in pc_unit
+      b01: 
+        wdsel_out = alu_system.out;
+      b10:
+        wdsel_out = mem_data_input;
+      default:
+        wdsel_out = alu_system.out;
+    } 
+    
+    // connect asel, bsel, alu, and wdsel
+    alu_system.a = asel_out;
+    alu_system.b = bsel_out; 
+    regfile_system.wdsel_out = wdsel_out;
+
+    // TASK 12
+    // output connections
+
+
+    // debug signals
+
+
+  }
+}

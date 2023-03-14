@@ -1,0 +1,156 @@
+module au_top (
+    input clk,              // 100MHz clock
+    input rst_n,            // reset button (active low)
+    output led [8],         // 8 user controllable LEDs
+    input usb_rx,           // USB->Serial input
+    output usb_tx,          // USB->Serial output
+    output io_led [3][8],   // LEDs on IO Shield
+    output io_seg [8],      // 7-segment LEDs on IO Shield
+    output io_sel [4],      // Digit select on IO Shield
+    input io_button [5],    // 5 buttons on IO Shield
+    input io_dip [3][8]     // DIP switches on IO Shield
+  ) {
+  
+  // helper signals
+  sig rst;                  // reset signal
+  sig next;                 // next instruction signal
+  sig debug_pcsel[16];
+  sig debug_asel[16];
+  sig debug_bsel[16];
+  sig debug_wdsel[16];
+
+  // motherboard
+  motherboard motherboard(.clk(clk), .rst(rst));
+  
+  // manual next button to advance one instruction
+  dff next_button(.clk(clk));
+  button_conditioner next_button_conditioner(.clk(clk));
+  edge_detector next_button_edge(#RISE(1), #FALL(0), .clk(clk));
+  
+  // interrupt button conditioners, edge detector, and input buffer
+  button_conditioner interrupt_button_conditioner[3](.clk(clk));
+  edge_detector interrupt_button_edge[3](#RISE(1), #FALL(0), .clk(clk));
+
+  // to run beta at slower clock than FPGA clock
+  counter frequency_divider(#SIZE(28), .clk(clk), .rst(rst));
+  edge_detector slowclock_edge(#RISE(1), #FALL(0), .clk(clk));
+  edge_detector fastclock_edge(#RISE(1), #FALL(0), .clk(clk)); 
+ 
+  // OTHERS (for debug)
+  multi_seven_seg seg(.clk(clk),.rst(rst));
+  reset_conditioner reset_cond(.clk(clk));
+  
+  always {
+    reset_cond.in = ~rst_n;   // input raw inverted reset signal
+    rst = reset_cond.out;     // conditioned reset
+    io_led = 3x{{h00}};       // turn all LED off at first
+    usb_tx = usb_rx;          // loop serial port
+    io_seg = 8hff; // connect segments to the driver
+    io_sel = 4hf; // connect digit select to the driver
+
+    
+    led = c{3b0, io_button};  // connect buttons to LEDs
+    io_led[2][7] = io_dip[2][7]; // see toggle manual/auto mode
+    io_led[2][6] = io_dip[2][6]; // see toggle fastclock 
+    io_led[2][5] = frequency_divider.value[27]; 
+    io_led[2][4] = frequency_divider.value[25];  
+    
+    // next button
+    next_button_conditioner.in = io_button[4];
+    next_button_edge.in = next_button_conditioner.out;
+    next_button.d = next_button_edge.out;
+    
+    // driving the beta 
+    slowclock_edge.in = frequency_divider.value[27];
+    fastclock_edge.in = frequency_divider.value[25];
+    
+    // connect hardware interrupt button 
+    interrupt_button_conditioner.in = io_button[2:0];
+    interrupt_button_edge.in = interrupt_button_conditioner.out;
+    motherboard.irq = interrupt_button_edge.out; // IRQ as long as any of of the buttons[2:0] is pressed
+
+    next = (slowclock_edge.out & io_dip[2][7]) | next_button.q; // proceed either when next button is pressed or io_dip[2][7] is 1
+
+    if (io_dip[2][6]){ // want faster clock
+     next = (fastclock_edge.out & io_dip[2][7]) | next_button.q; 
+    }
+    
+    motherboard.slowclk = next;
+  
+
+  // debugger to view Beta state    
+  seg.values = {4b0,4b0,4b0,4b0};
+  io_seg = ~seg.seg;
+  io_sel = ~seg.sel;
+  
+  debug_pcsel = motherboard.debug[0];
+  debug_asel = motherboard.debug[1];
+  debug_bsel = motherboard.debug[1];
+  debug_wdsel = motherboard.debug[1];
+
+  case (io_dip[0]){
+    h00: // MSB 16 bits of current instruction (id[31:16])
+      io_led[0] = motherboard.id[23:16];
+      io_led[1] = motherboard.id[31:24];
+      seg.values = {motherboard.id[31:28], motherboard.id[27:24], motherboard.id[23:20], motherboard.id[19:16]};
+    h01: // LSB 16 bits of current instruction (id[15:0])
+      io_led[0] = motherboard.id[7:0];
+      io_led[1] = motherboard.id[15:8];
+      seg.values = {motherboard.id[15:12], motherboard.id[11:8], motherboard.id[7:4], motherboard.id[3:0]}; 
+    h02: // LSB 16 bits of instruction address (ia[15:0])
+      io_led[0] = motherboard.ia[7:0];
+      io_led[1] = motherboard.ia[15:8];
+      seg.values = {motherboard.ia[15:12], motherboard.ia[11:8], motherboard.ia[7:4], motherboard.ia[3:0]};
+    h03: // LSB 16 bits of EA (this is also ALU output) (ma[15:0])
+      io_led[0] = motherboard.ma[7:0];
+      io_led[1] = motherboard.ma[15:8];
+      seg.values = {motherboard.ma[15:12], motherboard.ma[11:8],motherboard.ma[7:4], motherboard.ma[3:0]};
+    h04: // MSB 16 bits of EA (this is also ALU output) (ma[31:16])
+      io_led[0] = motherboard.ma[23:16];
+      io_led[1] = motherboard.ma[31:24];
+      seg.values = {motherboard.ma[31:28], motherboard.ma[27:24], motherboard.ma[23:20], motherboard.ma[19:16]}; 
+    h05: // LSB 16 bits of Mem[EA] (mrd[15:0])
+      io_led[0] = motherboard.mrd[7:0];
+      io_led[1] = motherboard.mrd[15:8];
+      seg.values = {motherboard.mrd[15:12], motherboard.mrd[11:8], motherboard.mrd[7:4], motherboard.mrd[3:0]}; 
+    h06: // MSB 16 bits of Mem[EA] (mrd[31:16])
+      io_led[0] = motherboard.mrd[23:16];
+      io_led[1] = motherboard.mrd[31:24];
+      seg.values = {motherboard.mrd[31:28], motherboard.mrd[27:24], motherboard.mrd[23:20], motherboard.mrd[19:16]}; 
+    h07: // LSB 16 bits of RD2 (mwd[15:0]) 
+      io_led[0] = motherboard.mwd[7:0];
+      io_led[1] = motherboard.mwd[15:8];
+      seg.values = {motherboard.mwd[15:12], motherboard.mwd[11:8],motherboard.mwd[7:4], motherboard.mwd[3:0]};
+    h08: // MSB 16 bits of RD2 (mwd[31:16])
+      io_led[0] = motherboard.mwd[23:16];
+      io_led[1] = motherboard.mwd[31:24];
+      seg.values = {motherboard.mwd[31:28], motherboard.mwd[27:24], motherboard.mwd[23:20], motherboard.mwd[19:16]};
+    h09: // LSB 16 bits of pcsel_out
+      io_led[0] = debug_pcsel[7:0];
+      io_led[1] = debug_pcsel[15:8];
+      seg.values = {debug_pcsel[15:12], debug_pcsel[11:8], debug_pcsel[7:4], debug_pcsel[3:0]};
+    h0A: // LSB 16 bits of asel_out
+      io_led[0] = debug_asel[7:0];
+      io_led[1] = debug_asel[15:8];
+      seg.values = {debug_asel[15:12], debug_asel[11:8], debug_asel[7:4], debug_asel[3:0]};
+    h0B: // LSB 16 bits of bsel_out
+      io_led[0] = debug_bsel[7:0];
+      io_led[1] = debug_bsel[15:8];
+      seg.values = {debug_bsel[15:12], debug_bsel[11:8], debug_bsel[7:4], debug_bsel[3:0]};
+    h0C: // LSB 16 bits of wdsel_out
+      io_led[0] = debug_wdsel[7:0];
+      io_led[1] = debug_wdsel[15:8];
+      seg.values = {debug_wdsel[15:12], debug_wdsel[11:8], debug_wdsel[7:4], debug_wdsel[3:0]};
+    h0D: // MSB 16 bits of instruction address. Useful to see PC31 (kernel/user mode) (ia[31:16])
+      io_led[0] = motherboard.ia[31:24];
+      io_led[1] = motherboard.ia[23:16];
+      seg.values = {motherboard.ia[31:28], motherboard.ia[27:24], motherboard.ia[23:20], motherboard.ia[19:16]}; 
+    h0E: // LSB 16 bits of system_input_buffer 
+      io_led[1:0] = {motherboard.input_buffer[15:8], motherboard.input_buffer[7:0]};
+      seg.values = {motherboard.input_buffer[15:12], motherboard.input_buffer[11:8], motherboard.input_buffer[7:4], motherboard.input_buffer[3:0]}; 
+    h0F: // LSB 16 bits of system_output_buffer 
+      io_led[1:0] = {motherboard.output_buffer[15:8], motherboard.output_buffer[7:0]};
+      seg.values = {motherboard.output_buffer[15:12], motherboard.output_buffer[11:8], motherboard.output_buffer[7:4],motherboard.output_buffer[3:0]}; 
+  }
+  }
+}

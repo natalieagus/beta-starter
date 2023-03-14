@@ -1,0 +1,16 @@
+module instruction_rom #(
+    WORDS = 16 // total instructions in this ROM
+)(
+    input addr[$clog2(WORDS)], // this ROM is WORD addressable
+    output out[32]
+  ) {
+  
+   // Driver code, BR(reset) is the first instruction
+  const INSTRUCTIONS = {
+    32h77FFFFF // 0x000 BEQ(R31, 0, R31)
+  };
+
+  always {
+    out = INSTRUCTIONS[addr];
+  }
+}

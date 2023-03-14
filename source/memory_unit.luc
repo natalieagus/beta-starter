@@ -1,0 +1,43 @@
+// supports byte addressable
+module memory_unit #(
+  WORDS = 16 // default number of words (entries) in the memory
+)
+(
+    input clk,  // clock
+    
+    // for data memory
+    input raddr[$clog2(WORDS)+2], // byte addressing expected
+    input waddr[$clog2(WORDS)+2], // byte addressing expected
+    input wd[32], // write data
+    input we,
+    output mrd[32],
+            
+    // for instruction memory 
+    input ia[$clog2(WORDS)+2], // byte addressing expected
+    input instruction_write_enable,
+    input instruction_towrite[32],
+    output id[32]
+
+  ) {
+
+  simple_ram instruction_memory(#SIZE(32), #DEPTH(WORDS), .clk(clk)); // can fit 32 * WORDS bits 
+  simple_dual_ram data_memory(#SIZE(32), #DEPTH(WORDS), .wclk(clk), .rclk(clk)); // can fit 32 * WORDS bits 
+ 
+  
+  always {
+
+    // instruction memory connections
+    instruction_memory.write_data = instruction_towrite;
+    instruction_memory.address = ia[$clog2(WORDS)+2-1:2]; // memory_unit is word addressable in Lucid, ignore two LSB
+    instruction_memory.write_en = instruction_write_enable;
+    id = instruction_memory.read_data;
+    
+    // data memory connections
+    data_memory.raddr = raddr[$clog2(WORDS)+2-1:2]; // memory_unit is word addressable in Lucid, ignore two LSB
+    data_memory.waddr = waddr[$clog2(WORDS)+2-1:2]; // memory_unit is word addressable in Lucid, ignore two LSB
+    data_memory.write_data = wd;
+    data_memory.write_en = we;
+    mrd = data_memory.read_data;
+    
+  }
+}

@@ -1,0 +1,127 @@
+module control_unit (
+    input clk,
+    input irq, 
+    input z,
+    input rst,    
+    input opcode[6],
+    input slowclk,
+    input ia31,
+    output pcsel[3], 
+    output wasel,
+    output asel,
+    output ra2sel,
+    output bsel,
+    output alufn[6],
+    output wdsel[2], 
+    output werf,
+    output wr
+  ) {
+  
+  const CU_ROM = { 
+    b01110000000000010,
+    b00000011000110110,
+    b00000011000010110,
+    b00000011000000110,
+    b01110000000000010,
+    b00000010101100110,
+    b00000010111100110, 
+    b00000010110000110,
+    b01110000000000010,
+    b00000011101110110,
+    b00000011101010110,
+    b00000011100110110,
+    b01110000000000010,
+    b01110000000000010,
+    b00000010000010110,
+    b00000010000000110,  
+    b01110000000000010,
+    b00000001000110110,
+    b00000001000010110, 
+    b00000001000000110,
+    b01110000000000010,
+    b00000000101100110,
+    b00000000111100110,
+    b00000000110000110, 
+    b01110000000000010, 
+    b00000001101110110,
+    b00000001101010110,
+    b00000001100110110,
+    b01110000000000010, 
+    b01110000000000010,
+    b00000000000010110,
+    b00000000000000110,
+    b00001000110101010,
+    b00001000110100010,
+    b00001000110100010,
+    b01110000000000010,
+    b01001000110100010,
+    b01110000000000010,
+    b00000110000000001,
+    b00000010000001010,
+    b01110000000000010,
+    b01110000000000010,
+    b01110000000000010,
+    b01110000000000010,
+    b01110000000000010,
+    b01110000000000010,
+    b01110000000000010,
+    b01110000000000010,
+    b01110000000000010,
+    b01110000000000010,
+    b01110000000000010,
+    b01110000000000010,
+    b01110000000000010,
+    b01110000000000010,
+    b01110000000000010,
+    b01110000000000010,
+    b01110000000000010,
+    b01110000000000010,
+    b01110000000000010,
+    b01110000000000010,
+    b01110000000000010,
+    b01110000000000010,
+    b01110000000000010,
+    b01110000000000010
+  };
+    
+  dff irq_sampler(#INIT(0), .clk(clk));
+
+  always {
+  
+    // sample interrupt at the beginning of each cycle
+    if (~irq_sampler.q){
+      // sample only when interrupt bit is 0 (clear) 
+      irq_sampler.d = irq;
+    }
+  
+    // control signal basic output connections
+    pcsel = CU_ROM[opcode][16:14]; 
+    wasel = CU_ROM[opcode][13]; 
+    asel = CU_ROM[opcode][12]; 
+    ra2sel = CU_ROM[opcode][11]; 
+    bsel = CU_ROM[opcode][10]; 
+    alufn = CU_ROM[opcode][9:4]; 
+    wdsel = CU_ROM[opcode][3:2];  
+    werf= CU_ROM[opcode][1];
+    wr = CU_ROM[opcode][0]; 
+    
+    // Task 10
+    // PCSEL for BNE/BEQ
+
+    
+  
+    // Task 11
+    // IRQ handling
+    // IRQ can happen only in user mode (ia31 is 0)
+    // If IRQ happens during kernel mode, it will not be serviced until we return to user mode
+
+    
+    
+    
+    // force wr = 0 when reset == 1 
+    if (rst){
+      wr = 0;
+    }
+
+  }
+}

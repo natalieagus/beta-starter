@@ -1,0 +1,51 @@
+module pc_unit (
+    input clk,  // clock
+    input rst,  // reset
+    input slowclk, // slowclock to advance pc
+    input id[16],
+    input pcsel[3],
+    input reg_data_1[32],
+    output pc_4[32],
+    output pc_4_sxtc[32],
+    output pcsel_out[32], // for debug only, does not exist in pc_unit
+    output ia[32]
+  ) {
+
+  dff pc[32](#INIT(0),.clk(clk)); // PC Register
+
+  sig pcsel_out_sig[32];
+  sig pc_4_sxtc_32_sig[32];
+  sig pc_4_sxtc_sig[32];
+  sig pc_4_sig[32];
+  
+  always {
+  
+    // initial setups to silence output compilation errors
+    pc_4_sig = 0;
+    pc_4_sxtc_sig = 0;
+    pcsel_out_sig = 0;
+    
+    // increment pc by 4
+    pc_4_sig = c{pc.q[31], pc.q[30:0] + 4};            
+    
+    // TASK 4
+    // shift-and-add pc by 4
+
+    
+    // TASK 1 
+    // PCSEL mux 
+
+
+    // Task 2
+    // RESET mux 
+
+    
+    // output connections
+    ia = pc.q;
+    pc_4 =  pc_4_sig;
+    pc_4_sxtc = pc_4_sxtc_sig;
+    pcsel_out = pcsel_out_sig;
+    
+    
+  }
+}
