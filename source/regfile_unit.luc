@@ -35,7 +35,6 @@ module regfile_unit (
     }
     
     // TASK 6
-    // RA2SEL mux
 
     
     
