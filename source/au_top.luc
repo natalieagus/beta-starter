@@ -67,7 +67,7 @@ module au_top (
     // connect hardware interrupt button 
     interrupt_button_conditioner.in = io_button[2:0];
     interrupt_button_edge.in = interrupt_button_conditioner.out;
-    motherboard.irq = interrupt_button_edge.out; // IRQ as long as any of of the buttons[2:0] is pressed
+    motherboard.irq = interrupt_button_edge.out; // pass all IRQ bits 
 
     next = (slowclock_edge.out & io_dip[2][7]) | next_button.q; // proceed either when next button is pressed or io_dip[2][7] is 1
 
@@ -78,79 +78,79 @@ module au_top (
     motherboard.slowclk = next;
   
 
-  // debugger to view Beta state    
-  seg.values = {4b0,4b0,4b0,4b0};
-  io_seg = ~seg.seg;
-  io_sel = ~seg.sel;
-  
-  debug_pcsel = motherboard.debug[0];
-  debug_asel = motherboard.debug[1];
-  debug_bsel = motherboard.debug[1];
-  debug_wdsel = motherboard.debug[1];
+    // debugger to view Beta state    
+    seg.values = {4b0,4b0,4b0,4b0};
+    io_seg = ~seg.seg;
+    io_sel = ~seg.sel;
+    
+    debug_pcsel = motherboard.debug[0];
+    debug_asel = motherboard.debug[1];
+    debug_bsel = motherboard.debug[1];
+    debug_wdsel = motherboard.debug[1];
 
-  case (io_dip[0]){
-    h00: // MSB 16 bits of current instruction (id[31:16])
-      io_led[0] = motherboard.id[23:16];
-      io_led[1] = motherboard.id[31:24];
-      seg.values = {motherboard.id[31:28], motherboard.id[27:24], motherboard.id[23:20], motherboard.id[19:16]};
-    h01: // LSB 16 bits of current instruction (id[15:0])
-      io_led[0] = motherboard.id[7:0];
-      io_led[1] = motherboard.id[15:8];
-      seg.values = {motherboard.id[15:12], motherboard.id[11:8], motherboard.id[7:4], motherboard.id[3:0]}; 
-    h02: // LSB 16 bits of instruction address (ia[15:0])
-      io_led[0] = motherboard.ia[7:0];
-      io_led[1] = motherboard.ia[15:8];
-      seg.values = {motherboard.ia[15:12], motherboard.ia[11:8], motherboard.ia[7:4], motherboard.ia[3:0]};
-    h03: // LSB 16 bits of EA (this is also ALU output) (ma[15:0])
-      io_led[0] = motherboard.ma[7:0];
-      io_led[1] = motherboard.ma[15:8];
-      seg.values = {motherboard.ma[15:12], motherboard.ma[11:8],motherboard.ma[7:4], motherboard.ma[3:0]};
-    h04: // MSB 16 bits of EA (this is also ALU output) (ma[31:16])
-      io_led[0] = motherboard.ma[23:16];
-      io_led[1] = motherboard.ma[31:24];
-      seg.values = {motherboard.ma[31:28], motherboard.ma[27:24], motherboard.ma[23:20], motherboard.ma[19:16]}; 
-    h05: // LSB 16 bits of Mem[EA] (mrd[15:0])
-      io_led[0] = motherboard.mrd[7:0];
-      io_led[1] = motherboard.mrd[15:8];
-      seg.values = {motherboard.mrd[15:12], motherboard.mrd[11:8], motherboard.mrd[7:4], motherboard.mrd[3:0]}; 
-    h06: // MSB 16 bits of Mem[EA] (mrd[31:16])
-      io_led[0] = motherboard.mrd[23:16];
-      io_led[1] = motherboard.mrd[31:24];
-      seg.values = {motherboard.mrd[31:28], motherboard.mrd[27:24], motherboard.mrd[23:20], motherboard.mrd[19:16]}; 
-    h07: // LSB 16 bits of RD2 (mwd[15:0]) 
-      io_led[0] = motherboard.mwd[7:0];
-      io_led[1] = motherboard.mwd[15:8];
-      seg.values = {motherboard.mwd[15:12], motherboard.mwd[11:8],motherboard.mwd[7:4], motherboard.mwd[3:0]};
-    h08: // MSB 16 bits of RD2 (mwd[31:16])
-      io_led[0] = motherboard.mwd[23:16];
-      io_led[1] = motherboard.mwd[31:24];
-      seg.values = {motherboard.mwd[31:28], motherboard.mwd[27:24], motherboard.mwd[23:20], motherboard.mwd[19:16]};
-    h09: // LSB 16 bits of pcsel_out
-      io_led[0] = debug_pcsel[7:0];
-      io_led[1] = debug_pcsel[15:8];
-      seg.values = {debug_pcsel[15:12], debug_pcsel[11:8], debug_pcsel[7:4], debug_pcsel[3:0]};
-    h0A: // LSB 16 bits of asel_out
-      io_led[0] = debug_asel[7:0];
-      io_led[1] = debug_asel[15:8];
-      seg.values = {debug_asel[15:12], debug_asel[11:8], debug_asel[7:4], debug_asel[3:0]};
-    h0B: // LSB 16 bits of bsel_out
-      io_led[0] = debug_bsel[7:0];
-      io_led[1] = debug_bsel[15:8];
-      seg.values = {debug_bsel[15:12], debug_bsel[11:8], debug_bsel[7:4], debug_bsel[3:0]};
-    h0C: // LSB 16 bits of wdsel_out
-      io_led[0] = debug_wdsel[7:0];
-      io_led[1] = debug_wdsel[15:8];
-      seg.values = {debug_wdsel[15:12], debug_wdsel[11:8], debug_wdsel[7:4], debug_wdsel[3:0]};
-    h0D: // MSB 16 bits of instruction address. Useful to see PC31 (kernel/user mode) (ia[31:16])
-      io_led[0] = motherboard.ia[31:24];
-      io_led[1] = motherboard.ia[23:16];
-      seg.values = {motherboard.ia[31:28], motherboard.ia[27:24], motherboard.ia[23:20], motherboard.ia[19:16]}; 
-    h0E: // LSB 16 bits of system_input_buffer 
-      io_led[1:0] = {motherboard.input_buffer[15:8], motherboard.input_buffer[7:0]};
-      seg.values = {motherboard.input_buffer[15:12], motherboard.input_buffer[11:8], motherboard.input_buffer[7:4], motherboard.input_buffer[3:0]}; 
-    h0F: // LSB 16 bits of system_output_buffer 
-      io_led[1:0] = {motherboard.output_buffer[15:8], motherboard.output_buffer[7:0]};
-      seg.values = {motherboard.output_buffer[15:12], motherboard.output_buffer[11:8], motherboard.output_buffer[7:4],motherboard.output_buffer[3:0]}; 
-  }
+    case (io_dip[0]){
+      h00: // MSB 16 bits of current instruction (id[31:16])
+        io_led[0] = motherboard.id[23:16];
+        io_led[1] = motherboard.id[31:24];
+        seg.values = {motherboard.id[31:28], motherboard.id[27:24], motherboard.id[23:20], motherboard.id[19:16]};
+      h01: // LSB 16 bits of current instruction (id[15:0])
+        io_led[0] = motherboard.id[7:0];
+        io_led[1] = motherboard.id[15:8];
+        seg.values = {motherboard.id[15:12], motherboard.id[11:8], motherboard.id[7:4], motherboard.id[3:0]}; 
+      h02: // LSB 16 bits of instruction address (ia[15:0])
+        io_led[0] = motherboard.ia[7:0];
+        io_led[1] = motherboard.ia[15:8];
+        seg.values = {motherboard.ia[15:12], motherboard.ia[11:8], motherboard.ia[7:4], motherboard.ia[3:0]};
+      h03: // LSB 16 bits of EA (this is also ALU output) (ma[15:0])
+        io_led[0] = motherboard.ma[7:0];
+        io_led[1] = motherboard.ma[15:8];
+        seg.values = {motherboard.ma[15:12], motherboard.ma[11:8],motherboard.ma[7:4], motherboard.ma[3:0]};
+      h04: // MSB 16 bits of EA (this is also ALU output) (ma[31:16])
+        io_led[0] = motherboard.ma[23:16];
+        io_led[1] = motherboard.ma[31:24];
+        seg.values = {motherboard.ma[31:28], motherboard.ma[27:24], motherboard.ma[23:20], motherboard.ma[19:16]}; 
+      h05: // LSB 16 bits of Mem[EA] (mrd[15:0])
+        io_led[0] = motherboard.mrd[7:0];
+        io_led[1] = motherboard.mrd[15:8];
+        seg.values = {motherboard.mrd[15:12], motherboard.mrd[11:8], motherboard.mrd[7:4], motherboard.mrd[3:0]}; 
+      h06: // MSB 16 bits of Mem[EA] (mrd[31:16])
+        io_led[0] = motherboard.mrd[23:16];
+        io_led[1] = motherboard.mrd[31:24];
+        seg.values = {motherboard.mrd[31:28], motherboard.mrd[27:24], motherboard.mrd[23:20], motherboard.mrd[19:16]}; 
+      h07: // LSB 16 bits of RD2 (mwd[15:0]) 
+        io_led[0] = motherboard.mwd[7:0];
+        io_led[1] = motherboard.mwd[15:8];
+        seg.values = {motherboard.mwd[15:12], motherboard.mwd[11:8],motherboard.mwd[7:4], motherboard.mwd[3:0]};
+      h08: // MSB 16 bits of RD2 (mwd[31:16])
+        io_led[0] = motherboard.mwd[23:16];
+        io_led[1] = motherboard.mwd[31:24];
+        seg.values = {motherboard.mwd[31:28], motherboard.mwd[27:24], motherboard.mwd[23:20], motherboard.mwd[19:16]};
+      h09: // LSB 16 bits of pcsel_out
+        io_led[0] = debug_pcsel[7:0];
+        io_led[1] = debug_pcsel[15:8];
+        seg.values = {debug_pcsel[15:12], debug_pcsel[11:8], debug_pcsel[7:4], debug_pcsel[3:0]};
+      h0A: // LSB 16 bits of asel_out
+        io_led[0] = debug_asel[7:0];
+        io_led[1] = debug_asel[15:8];
+        seg.values = {debug_asel[15:12], debug_asel[11:8], debug_asel[7:4], debug_asel[3:0]};
+      h0B: // LSB 16 bits of bsel_out
+        io_led[0] = debug_bsel[7:0];
+        io_led[1] = debug_bsel[15:8];
+        seg.values = {debug_bsel[15:12], debug_bsel[11:8], debug_bsel[7:4], debug_bsel[3:0]};
+      h0C: // LSB 16 bits of wdsel_out
+        io_led[0] = debug_wdsel[7:0];
+        io_led[1] = debug_wdsel[15:8];
+        seg.values = {debug_wdsel[15:12], debug_wdsel[11:8], debug_wdsel[7:4], debug_wdsel[3:0]};
+      h0D: // MSB 16 bits of instruction address. Useful to see PC31 (kernel/user mode) (ia[31:16])
+        io_led[0] = motherboard.ia[31:24];
+        io_led[1] = motherboard.ia[23:16];
+        seg.values = {motherboard.ia[31:28], motherboard.ia[27:24], motherboard.ia[23:20], motherboard.ia[19:16]}; 
+      h0E: // LSB 16 bits of system_input_buffer 
+        io_led[1:0] = {motherboard.input_buffer[15:8], motherboard.input_buffer[7:0]};
+        seg.values = {motherboard.input_buffer[15:12], motherboard.input_buffer[11:8], motherboard.input_buffer[7:4], motherboard.input_buffer[3:0]}; 
+      h0F: // LSB 16 bits of system_output_buffer 
+        io_led[1:0] = {motherboard.output_buffer[15:8], motherboard.output_buffer[7:0]};
+        seg.values = {motherboard.output_buffer[15:12], motherboard.output_buffer[11:8], motherboard.output_buffer[7:4],motherboard.output_buffer[3:0]}; 
+    }
   }
 }
