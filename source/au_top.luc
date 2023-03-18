@@ -76,7 +76,6 @@ module au_top (
     }
     
     motherboard.slowclk = next;
-  
 
     // debugger to view Beta state    
     seg.values = {4b0,4b0,4b0,4b0};

@@ -19,7 +19,7 @@ module motherboard (
   // setup and instantiate memory unit and instruction ROM
   const MEMORY_SIZE = 32;
   instruction_rom instruction_unit(#WORDS(MEMORY_SIZE));
-  memory_unit memory_unit(#WORDS(MEMORY_SIZE), .clk(clk)); // can fit 32 * 32 bits 
+  memory_unit memory_unit(#WORDS(MEMORY_SIZE), .clk(clk)); 
   
   // prepare output buffer
   dff system_output_buffer[32](.clk(clk), .rst(rst)); // 32 bit beta output buffer, hardwired to always read memory_unit value at byte address 0xC
