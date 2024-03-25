@@ -84,8 +84,8 @@ module au_top (
     
     debug_pcsel = motherboard.debug[0];
     debug_asel = motherboard.debug[1];
-    debug_bsel = motherboard.debug[1];
-    debug_wdsel = motherboard.debug[1];
+    debug_bsel = motherboard.debug[2];
+    debug_wdsel = motherboard.debug[3];
 
     case (io_dip[0]){
       h00: // MSB 16 bits of current instruction (id[31:16])
