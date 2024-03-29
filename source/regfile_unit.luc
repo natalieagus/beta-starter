@@ -30,11 +30,38 @@ module regfile_unit (
     //*****REGFILE*******//
     // do not write anything to the regfile unless PC advances 
     regfile.write_enable = 0;
+    
     if (slowclk) {
       regfile.write_enable = werf;
     }
     
     // TASK 6
+    
+    // RA2SEL mux
+    case(ra2sel) {
+      
+      b0:
+        ra2sel_out = rb;
+        
+      b1:
+        ra2sel_out = rc;
+      
+      default:
+        ra2sel_out = rb;
+    }
+    
+    // WASEL mux
+    case(wasel) {
+      
+      b0:
+        wasel_out = rc;
+        
+      b1:
+        wasel_out = b11110;
+        
+      default:
+        wasel_out = rc;
+    }
 
     
     
@@ -47,7 +74,7 @@ module regfile_unit (
     // TASK 8
     // compute z 
 
-    
+    z = ~|regfile.reg_data_1;
 
     // output connections
     reg_data_1 = regfile.reg_data_1; 
@@ -55,8 +82,7 @@ module regfile_unit (
     
     // TASK 9
     // connect output of RD2 port of regfile_memory as mwd
-
-
-
+    
+    mwd = regfile.reg_data_2;
   }
 }

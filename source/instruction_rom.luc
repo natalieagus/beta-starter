@@ -7,7 +7,12 @@ module instruction_rom #(
   
    // Driver code, BR(reset) is the first instruction
   const INSTRUCTIONS = {
-    32h77FFFFFF // 0x000 BEQ(R31, 0, R31)
+    // 32h77FFFFFF // 0x000 BEQ(R31, 0, R31)
+    32h7BE3FFFB, // 0x010 BNE(R3, main, R31) 
+    32h607F0020, // 0x00C LD(R31, 32, R3) 
+    32h643F0020, // 0x008 ST(R1, 32, R31)
+    32h90410800, // 0x004 CMPEQ(R1, R1, R2) 
+    32hC03F0003 // 0x000 ADDC(R31, 3, R1) --- main
   };
 
   always {

@@ -1,0 +1,23 @@
+module adder (
+    input a[32],
+    input b[32],
+    input alufn_signal[6],
+    output out[32],
+    output z,
+    output v,
+    output n
+  ) 
+{
+thirtytwobit_rca ttba;
+always {
+    // set the inputs to the first unit (LSB) of the RCA 
+    ttba.a = a;
+    ttba.b = b ^ 32x{alufn_signal[0]};
+    ttba.ci = alufn_signal[0];
+ 
+    out = ttba.s;
+    v = (a[31] & ((b[31] ^ alufn_signal[0])) & ~ttba.s[31]) | (~a[31] & ~(b[31] ^ alufn_signal[0]) & ttba.s[31]);
+    z = ((~(|ttba.s)) == 1) ? 1 : 0;
+    n = (ttba.s[31] == 1) ? 1 : 0; 
+  }
+}

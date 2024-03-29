@@ -1,0 +1,21 @@
+module thirtytwobit_rca (
+  input a[32],
+  input b[32],
+  input ci,
+  output s[32],
+  output co
+)
+
+{ 
+full_adder fa[32];
+always {
+  
+  fa.a = a;
+  fa.b = b;
+  fa.ci[0] = ci;
+  fa.ci[31:1] = fa.co[30:0];
+    
+  s = fa.s;
+  co = fa.co[31];
+  }
+}

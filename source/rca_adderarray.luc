@@ -1,0 +1,56 @@
+module rca_adderarray (
+    input a[32],
+    input b[32],
+    output out[32]
+  ) {
+
+  
+ thirtytwobit_rca adderarray[31];
+ var i;
+  
+  always {
+  
+    adderarray.a[0] = c{c{a[30:0]} & 31x{b[1]}, b0};
+    adderarray.a[1] = c{c{a[29:0]} & 30x{b[2]}, 2b0};
+    adderarray.a[2] = c{c{a[28:0]} & 29x{b[3]}, 3b0};
+    adderarray.a[3] = c{c{a[27:0]} & 28x{b[4]}, 4b0};
+    adderarray.a[4] = c{c{a[26:0]} & 27x{b[5]}, 5b0};
+    adderarray.a[5] = c{c{a[25:0]} & 26x{b[6]}, 6b0};
+    adderarray.a[6] = c{c{a[24:0]} & 25x{b[7]}, 7b0};
+    adderarray.a[7] = c{c{a[23:0]} & 24x{b[8]}, 8b0};
+    adderarray.a[8] = c{c{a[22:0]} & 23x{b[9]}, 9b0};
+    adderarray.a[9] = c{c{a[21:0]} & 22x{b[10]}, 10b0};
+    adderarray.a[10] = c{c{a[20:0]} & 21x{b[11]}, 11b0};
+    adderarray.a[11] = c{c{a[19:0]} & 20x{b[12]}, 12b0};
+    adderarray.a[12] = c{c{a[18:0]} & 19x{b[13]}, 13b0};
+    adderarray.a[13] = c{c{a[17:0]} & 18x{b[14]}, 14b0};
+    adderarray.a[14] = c{c{a[16:0]} & 17x{b[15]}, 15b0};
+    adderarray.a[15] = c{c{a[15:0]} & 16x{b[16]}, 16b0};
+    adderarray.a[16] = c{c{a[14:0]} & 15x{b[17]}, 17b0};
+    adderarray.a[17] = c{c{a[13:0]} & 14x{b[18]}, 18b0};
+    adderarray.a[18] = c{c{a[12:0]} & 13x{b[19]}, 19b0};
+    adderarray.a[19] = c{c{a[11:0]} & 12x{b[20]}, 20b0};
+    adderarray.a[20] = c{c{a[10:0]} & 11x{b[21]}, 21b0};
+    adderarray.a[21] = c{c{a[9:0]} & 10x{b[22]}, 22b0};
+    adderarray.a[22] = c{c{a[8:0]} & 9x{b[23]}, 23b0};
+    adderarray.a[23] = c{c{a[7:0]} & 8x{b[24]}, 24b0};
+    adderarray.a[24] = c{c{a[6:0]} & 7x{b[25]}, 25b0};
+    adderarray.a[25] = c{c{a[5:0]} & 6x{b[26]}, 26b0};
+    adderarray.a[26] = c{c{a[4:0]} & 5x{b[27]}, 27b0};
+    adderarray.a[27] = c{c{a[3:0]} & 4x{b[28]}, 28b0};
+    adderarray.a[28] = c{c{a[2:0]} & 3x{b[29]}, 29b0};
+    adderarray.a[29] = c{c{a[1:0]} & 2x{b[30]}, 30b0};
+    adderarray.a[30] = c{a[0] & b[31], 31b0};
+    
+    
+    adderarray.b[0] = a & 32x{b[0]};
+    for (i = 1; i < 31; i++) {
+      adderarray.b[i] = adderarray.s[i-1];
+        }
+    
+    adderarray.ci = 32x{b0}; // ci of each row = GND
+    
+    out = adderarray.s[30];
+    
+  }
+}

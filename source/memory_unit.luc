@@ -6,7 +6,7 @@ module memory_unit #(
     input clk,  // clock
     
     // for data memory
-    input raddr[$clog2(WORDS)+2], // byte addressing expected
+    input raddr[$clog2(WORDS)+2], // byte addressing expected 
     input waddr[$clog2(WORDS)+2], // byte addressing expected
     input wd[32], // write data
     input we,

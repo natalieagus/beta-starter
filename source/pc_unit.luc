@@ -26,26 +26,64 @@ module pc_unit (
     pcsel_out_sig = 0;
     
     // increment pc by 4
-    pc_4_sig = c{pc.q[31], pc.q[30:0] + 4};            
+    pc_4_sig = c{pc.q[31], pc.q[30:0] + 4};
+    pc_4_sxtc_32_sig = pc.q + 4 + 4 * c{id[15], id[15:0]};
+    pc_4_sxtc_sig = c{pc.q[31], pc_4_sxtc_32_sig[30:0]};            
     
     // TASK 4
     // shift-and-add pc by 4
 
     
     // TASK 1 
-    // PCSEL mux 
-
-
+    // PCSEL mux
+    
+    case (pcsel) {
+      
+      b000:
+        pcsel_out_sig = c{pc_4_sig[31:2], b00};
+      
+      b001:
+        pcsel_out_sig = c{pc_4_sxtc_sig[31:2], b00};
+      
+      b010:
+        pcsel_out_sig = (pc.q[31] == 0) ? c{b0, reg_data_1[30:2], b00} : c{reg_data_1[31:2], b00};
+      
+      b011:
+        pcsel_out_sig = h80000004;
+      
+      b100:
+        pcsel_out_sig = h80000008;
+      
+      b101:
+        pcsel_out_sig = h80000008;
+        
+      b110:
+        pcsel_out_sig = h80000008;
+      
+      b111:
+        pcsel_out_sig = h80000008;
+      
+      default:
+        pcsel_out_sig = pc.q;
+    }
+    
+    if (slowclk) {
+      pc.d = pcsel_out_sig;
+    }
+   
     // Task 2
     // RESET mux 
-
     
+    case (rst){    
+      b1:
+        pc.d = h80000000;
+    }
+      
     // output connections
     ia = pc.q;
-    pc_4 =  pc_4_sig;
+    pc_4 = c{pc_4_sig[31:2], b00};
     pc_4_sxtc = pc_4_sxtc_sig;
     pcsel_out = pcsel_out_sig;
-    
-    
+   
   }
 }

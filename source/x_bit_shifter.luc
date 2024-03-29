@@ -1,0 +1,70 @@
+module x_bit_shifter (
+    input a[32],
+    input b[5],
+    input alufn_signal[6],
+    output out[32]
+  ) {
+  
+  mux_2 mux_2_16[32];
+  mux_2 mux_2_8[32];
+  mux_2 mux_2_4[32];
+  mux_2 mux_2_2[32];
+  mux_2 mux_2_1[32];
+  
+  always {
+  
+    //default assignment to avoid errors
+    
+    mux_2_16.s0 = 32x{b[4]};
+    mux_2_8.s0 = 32x{b[3]};
+    mux_2_4.s0 = 32x{b[2]};
+    mux_2_2.s0 = 32x{b[1]};
+    mux_2_1.s0 = 32x{b[0]};
+    
+    mux_2_16.g0 = a;
+    mux_2_8.g0 = mux_2_16.out;
+    mux_2_4.g0 = mux_2_8.out;
+    mux_2_2.g0 = mux_2_4.out;
+    mux_2_1.g0 = mux_2_2.out;
+    
+    case (c{alufn_signal[1], alufn_signal[0]}){
+      b00:  // shift left 
+        mux_2_16.g1 = c{a[15:0], 16b0};
+        mux_2_8.g1 = c{mux_2_16.out[23:0], 8b0};
+        mux_2_4.g1 = c{mux_2_8.out[27:0], 4b0};
+        mux_2_2.g1 = c{mux_2_4.out[29:0], 2b0};
+        mux_2_1.g1 = c{mux_2_2.out[30:0], b0};
+        
+        
+      b01: // shift right
+        mux_2_16.g1 = c{16b0, a[31:16]};
+        mux_2_8.g1 = c{8b0, mux_2_16.out[31:8]};
+        mux_2_4.g1 = c{4b0, mux_2_8.out[31:4]};
+        mux_2_2.g1 = c{2b0, mux_2_4.out[31:2]};
+        mux_2_1.g1 = c{b0, mux_2_2.out[31:1]};
+        
+      b11: // shift right arithmetic
+        mux_2_16.g1 = c{16x{a[31]}, a[31:16]};
+        mux_2_8.g1 = c{8x{a[31]}, mux_2_16.out[31:8]};
+        mux_2_4.g1 = c{4x{a[31]}, mux_2_8.out[31:4]};
+        mux_2_2.g1 = c{2x{a[31]}, mux_2_4.out[31:2]};
+        mux_2_1.g1 = c{a[31], mux_2_2.out[31:1]};
+
+      default:
+        mux_2_16.g1 = 32b0;
+        mux_2_8.g1 = 32b0;
+        mux_2_4.g1 = 32b0;
+        mux_2_2.g1 = 32b0;
+        mux_2_1.g1 = 32b0;
+    }
+    
+    out = (alufn_signal[1:0] == 10) ? 32b0 : mux_2_1.out; // silencing output in the event of invalid input
+    
+    // assign value to shifted_bits[32] depending on the value of SHIFT
+    // connect the selector of each mux_2 with shift 
+    // 
+    // use a for-loop to: 
+    // connect input[0][i] of each mux_2 with a[i]
+    // connect input[1][i] of each mux_2 with the shiftedbits[i]xs
+  }
+}

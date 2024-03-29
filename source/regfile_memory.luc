@@ -18,7 +18,157 @@ module regfile_memory (
     reg_data_1 = 0;
     reg_data_2 = 0;
 
-    // TASK 7 
+    // TASK 7
+    
+    case(read_address_1) {
+      b00000:
+        reg_data_1 = registers.q[0];
+      b00001:
+        reg_data_1 = registers.q[1];
+      b00010:
+        reg_data_1 = registers.q[2];
+      b00011:
+        reg_data_1 = registers.q[3];
+      b00100:
+        reg_data_1 = registers.q[4];
+      b00101:
+        reg_data_1 = registers.q[5];
+      b00110:
+        reg_data_1 = registers.q[6];
+      b00111:
+        reg_data_1 = registers.q[7];
+      b01000:
+        reg_data_1 = registers.q[8];
+      b01001:
+        reg_data_1 = registers.q[9];
+      b01010:
+        reg_data_1 = registers.q[10];
+      b01011:
+        reg_data_1 = registers.q[11];
+      b01100:
+        reg_data_1 = registers.q[12];
+      b01101:
+        reg_data_1 = registers.q[13];
+      b01110:
+        reg_data_1 = registers.q[14];
+      b01111:
+        reg_data_1 = registers.q[15];
+      b10000:
+        reg_data_1 = registers.q[16];
+      b10001:
+        reg_data_1 = registers.q[17];
+      b10010:
+        reg_data_1 = registers.q[18];
+      b10011:
+        reg_data_1 = registers.q[19];
+      b10100:
+        reg_data_1 = registers.q[20];
+      b10101:
+        reg_data_1 = registers.q[21];
+      b10110:
+        reg_data_1 = registers.q[22];
+      b10111:
+        reg_data_1 = registers.q[23];
+      b11000:
+        reg_data_1 = registers.q[24];
+      b11001:
+        reg_data_1 = registers.q[25];
+      b11010:
+        reg_data_1 = registers.q[26];
+      b11011:
+        reg_data_1 = registers.q[27];
+      b11100:
+        reg_data_1 = registers.q[28];
+      b11101:
+        reg_data_1 = registers.q[29];
+      b11110:
+        reg_data_1 = registers.q[30];
+      b11111:
+        reg_data_1 = 32b0;
+    }
+    
+    case(read_address_2) {
+      b00000:
+        reg_data_2 = registers.q[0];
+      b00001:
+        reg_data_2 = registers.q[1];
+      b00010:
+        reg_data_2 = registers.q[2];
+      b00011:
+        reg_data_2 = registers.q[3];
+      b00100:
+        reg_data_2 = registers.q[4];
+      b00101:
+        reg_data_2 = registers.q[5];
+      b00110:
+        reg_data_2 = registers.q[6];
+      b00111:
+        reg_data_2 = registers.q[7];
+      b01000:
+        reg_data_2 = registers.q[8];
+      b01001:
+        reg_data_2 = registers.q[9];
+      b01010:
+        reg_data_2 = registers.q[10];
+      b01011:
+        reg_data_2 = registers.q[11];
+      b01100:
+        reg_data_2 = registers.q[12];
+      b01101:
+        reg_data_2 = registers.q[13];
+      b01110:
+        reg_data_2 = registers.q[14];
+      b01111:
+        reg_data_2 = registers.q[15];
+      b10000:
+        reg_data_2 = registers.q[16];
+      b10001:
+        reg_data_2 = registers.q[17];
+      b10010:
+        reg_data_2 = registers.q[18];
+      b10011:
+        reg_data_2 = registers.q[19];
+      b10100:
+        reg_data_2 = registers.q[20];
+      b10101:
+        reg_data_2 = registers.q[21];
+      b10110:
+        reg_data_2 = registers.q[22];
+      b10111:
+        reg_data_2 = registers.q[23];
+      b11000:
+        reg_data_2 = registers.q[24];
+      b11001:
+        reg_data_2 = registers.q[25];
+      b11010:
+        reg_data_2 = registers.q[26];
+      b11011:
+        reg_data_2 = registers.q[27];
+      b11100:
+        reg_data_2 = registers.q[28];
+      b11101:
+        reg_data_2 = registers.q[29];
+      b11110:
+        reg_data_2 = registers.q[30];
+      b11111:
+        reg_data_2 = 32b0;
+    }
+    
+    case(write_enable) {
+    
+      b0:
+        registers.d = registers.q;
+      
+      b1: 
+        case(write_address) {
+
+          b11111:
+            registers.d[31] = registers.q[31];
+            
+          default:
+            registers.d[16 * write_address[4] + 8 * write_address[3] + 4 * write_address[2] + 2 * write_address[1] + 1 * write_address[0]] = write_data;
+        }
+    }
 
     
 

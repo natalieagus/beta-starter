@@ -8,13 +8,62 @@ module alu (
   ) {
   
     // declare your ALU units here 
+    adder adder;
+    boolean boolean;
+    shifter shifter;
+    compare compare; 
+    multiplier multiplier;
+    mux_2 mux_a[32];
+    mux_4 mux_b[32];
+    var i;
   
   
   always {
-    // paste your ALU implementation here 
-    out = 0;
-    zvn = 0;
+    // paste your ALU implementation here
+    // default values to silence errors  
+    mux_b.in = 32x{{4b0}};
     
+    // input-module assignments
+    adder.a = a;
+    adder.b = b;
+    adder.alufn_signal = alufn_signal;
+    zvn[0] = adder.z;
+    zvn[1] = adder.v;
+    zvn[2] = adder.n;
+    out = adder.out; 
+        
+    compare.z = adder.z;
+    compare.v = adder.v;
+    compare.n = adder.n;
+    compare.alufn_signal = alufn_signal;
+    
+    boolean.a = a;
+    boolean.b = b;
+    boolean.alufn_signal = alufn_signal;
+    
+    shifter.a = a;
+    shifter.b = b[3:0];
+    shifter.alufn_signal = alufn_signal;
+    
+    multiplier.a = a;
+    multiplier.b = b;
+    
+    // output mux logic
+    
+    mux_a.g0 = adder.out;
+    mux_a.g1 = multiplier.mul;
+    mux_a.s0 = 32x{alufn_signal[1]};
+    
+    for (i = 0; i < 16; i++) {
+      mux_b.in[i][0] = mux_a.out[i];
+      mux_b.in[i][1] = boolean.bool[i];
+      mux_b.in[i][2] = shifter.shift[i];
+      mux_b.in[i][3] = (i == 0) ? compare.cmp : 0;
+    }
+    
+    mux_b.s0 = 32x{alufn_signal[4]};
+    mux_b.s1 = 32x{alufn_signal[5]};
+    out = mux_b.out;
     
   }
 }

@@ -1,0 +1,17 @@
+module mux_2 (
+    input s0,
+    input g0,
+    input g1, // note: you can put input as an array, or declare them separately, e.g: input d0, input d1
+    // it will affect how you utilise this mux
+    output out
+  ) {
+
+  always {
+    case (s0) {
+      0: out = g0;
+      1: out = g1;
+      default:
+        out = 0;
+    }
+  }
+}

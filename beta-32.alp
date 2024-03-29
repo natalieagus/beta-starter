@@ -1,26 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="beta-32" board="Alchitry Au" language="Lucid" version="3">
   <files>
-    <src>seven_seg.luc</src>
-    <component>simple_dual_ram.v</component>
     <src>regfile_memory.luc</src>
-    <component>pipeline.luc</component>
-    <src>beta_cpu.luc</src>
-    <component>counter.luc</component>
     <src>regfile_unit.luc</src>
-    <src>memory_unit.luc</src>
-    <src>alu.luc</src>
-    <component>decoder.luc</component>
     <src>pc_unit.luc</src>
-    <src>control_unit.luc</src>
-    <component>simple_ram.v</component>
-    <src>motherboard.luc</src>
+    <component>pipeline.luc</component>
+    <component>counter.luc</component>
+    <src>beta_cpu.luc</src>
     <src top="true">au_top.luc</src>
+    <src>compare.luc</src>
+    <src>motherboard.luc</src>
     <src>instruction_rom.luc</src>
-    <component>reset_conditioner.luc</component>
     <src>multi_seven_seg.luc</src>
-    <component>edge_detector.luc</component>
+    <component>reset_conditioner.luc</component>
+    <src>thirtytwobit_rca.luc</src>
+    <src>full_adder.luc</src>
     <component>button_conditioner.luc</component>
+    <src>mux_4.luc</src>
+    <src>multiplier.luc</src>
+    <component>simple_dual_ram.v</component>
+    <src>seven_seg.luc</src>
+    <src>memory_unit.luc</src>
+    <src>control_unit.luc</src>
+    <src>boolean.luc</src>
+    <src>adder.luc</src>
+    <component>decoder.luc</component>
+    <src>shifter.luc</src>
+    <src>x_bit_shifter.luc</src>
+    <component>simple_ram.v</component>
+    <src>mux_2.luc</src>
+    <component>edge_detector.luc</component>
+    <src>alu.luc</src>
+    <src>rca_adderarray.luc</src>
     <constraint lib="true">alchitry.acf</constraint>
     <constraint lib="true">io.acf</constraint>
     <constraint lib="true">au.xdc</constraint>

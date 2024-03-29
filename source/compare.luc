@@ -1,0 +1,23 @@
+module compare (
+    input z,
+    input v,
+    input n,
+    input alufn_signal[6],
+    output cmp
+  ) {
+  
+mux_4 mux_4;
+  always {
+    // default values to silence errors 
+    cmp = 0;
+    
+    mux_4.s0 = alufn_signal[1];
+    mux_4.s1 = alufn_signal[2];
+    mux_4.in[0] = 0; // what to write for unused input?
+    mux_4.in[1] = z;
+    mux_4.in[2] = n ^ v;
+    mux_4.in[3] = z | (n ^ v);
+    
+    cmp = mux_4.out;
+  }
+}

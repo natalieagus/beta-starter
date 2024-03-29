@@ -47,10 +47,6 @@ module beta_cpu (
     pc_system.pcsel = 0;
     
     // Task 12
-
-
-
-    
  
     //****** ALU + WDSEL unit *******//
     // ASEL mux
@@ -94,9 +90,40 @@ module beta_cpu (
 
     // TASK 12
     // output connections
-
+    
+    ia = pc_system.ia;
+    mem_data_address = alu_system.out;
+    mem_data_output = regfile_system.reg_data_2;
+    wr = control_system.wr;
+    
+    //***** CONTROL unit ******//
+    control_system.irq = irq;
+    control_system.slowclk = slowclk;
+    control_system.ia31 = pc_system.ia[31];
+    control_system.opcode = instruction[31:26];
+    control_system.z = regfile_system.z;
+    
+    //***** PC unit ******// 
+    pc_system.slowclk = slowclk;
+    pc_system.id = instruction[15:0];
+    pc_system.reg_data_1 = regfile_system.reg_data_1;
+    pc_system.pcsel = control_system.pcsel;
+    
+    //***** REGFILE unit *****//
+    regfile_system.ra2sel = control_system.ra2sel;
+    regfile_system.wasel = control_system.wasel;
+    regfile_system.ra = instruction[20:16];
+    regfile_system.rb = instruction[15:11];
+    regfile_system.rc = instruction[25:21];
+    regfile_system.werf = control_system.werf;
+    regfile_system.slowclk = slowclk;
 
     // debug signals
+    
+    debug[0][15:0] = pc_system.pcsel_out[15:0];
+    debug[1][15:0] = asel_out[15:0];
+    debug[2][15:0] = bsel_out[15:0];
+    debug[3][15:0] = wdsel_out[15:0];
 
 
   }
